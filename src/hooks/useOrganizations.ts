@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import type { CreateOrgPayload, Organization } from '@/types'
 
@@ -75,8 +76,12 @@ export function useCreateOrganization() {
       if (error) throw error
       return data
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: orgKeys.list() })
+      toast.success(`"${(data as { name: string }).name}" created successfully`)
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : 'Failed to create organization')
     },
   })
 }

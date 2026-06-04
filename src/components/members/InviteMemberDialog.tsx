@@ -23,7 +23,6 @@ interface InviteMemberDialogProps {
 
 export function InviteMemberDialog({ organizationId }: InviteMemberDialogProps) {
   const [open, setOpen] = useState(false)
-  const [serverError, setServerError] = useState<string | null>(null)
   const { mutateAsync, isPending } = useInviteMember()
 
   const {
@@ -34,13 +33,12 @@ export function InviteMemberDialog({ organizationId }: InviteMemberDialogProps) 
   } = useForm<InviteMemberFormData>({ resolver: zodResolver(inviteMemberSchema) })
 
   async function onSubmit(data: InviteMemberFormData) {
-    setServerError(null)
     try {
       await mutateAsync({ organization_id: organizationId, email: data.email })
       reset()
       setOpen(false)
-    } catch (err) {
-      setServerError(err instanceof Error ? err.message : 'Failed to send invitation')
+    } catch {
+      // toast is shown by the mutation's onError handler
     }
   }
 
@@ -62,12 +60,6 @@ export function InviteMemberDialog({ organizationId }: InviteMemberDialogProps) 
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {serverError && (
-            <div className="rounded-md bg-[--color-destructive]/10 px-3 py-2 text-sm text-[--color-destructive]">
-              {serverError}
-            </div>
-          )}
-
           <div className="space-y-1.5">
             <Label htmlFor="invite-email">Email address</Label>
             <Input
