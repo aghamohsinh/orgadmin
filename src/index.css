@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: system-ui, -apple-system, sans-serif;
+  --radius: 0.5rem;
+
+  /* Light mode tokens */
+  --color-background: oklch(1 0 0);
+  --color-foreground: oklch(0.145 0 0);
+  --color-card: oklch(1 0 0);
+  --color-card-foreground: oklch(0.145 0 0);
+  --color-popover: oklch(1 0 0);
+  --color-popover-foreground: oklch(0.145 0 0);
+  --color-primary: oklch(0.488 0.243 264.376);
+  --color-primary-foreground: oklch(0.984 0.003 247.858);
+  --color-secondary: oklch(0.961 0.005 264.531);
+  --color-secondary-foreground: oklch(0.21 0.034 264.665);
+  --color-muted: oklch(0.961 0.005 264.531);
+  --color-muted-foreground: oklch(0.551 0.027 264.364);
+  --color-accent: oklch(0.961 0.005 264.531);
+  --color-accent-foreground: oklch(0.21 0.034 264.665);
+  --color-destructive: oklch(0.577 0.245 27.325);
+  --color-destructive-foreground: oklch(0.984 0.003 247.858);
+  --color-border: oklch(0.928 0.006 264.531);
+  --color-input: oklch(0.928 0.006 264.531);
+  --color-ring: oklch(0.488 0.243 264.376);
+}
+
+.dark {
+  --color-background: oklch(0.145 0 0);
+  --color-foreground: oklch(0.985 0 0);
+  --color-card: oklch(0.205 0 0);
+  --color-card-foreground: oklch(0.985 0 0);
+  --color-popover: oklch(0.205 0 0);
+  --color-popover-foreground: oklch(0.985 0 0);
+  --color-primary: oklch(0.623 0.214 259.815);
+  --color-primary-foreground: oklch(0.21 0.034 264.665);
+  --color-secondary: oklch(0.279 0.041 260.031);
+  --color-secondary-foreground: oklch(0.985 0 0);
+  --color-muted: oklch(0.279 0.041 260.031);
+  --color-muted-foreground: oklch(0.707 0.022 261.325);
+  --color-accent: oklch(0.279 0.041 260.031);
+  --color-accent-foreground: oklch(0.985 0 0);
+  --color-destructive: oklch(0.704 0.191 22.216);
+  --color-destructive-foreground: oklch(0.985 0 0);
+  --color-border: oklch(0.279 0.041 260.031);
+  --color-input: oklch(0.279 0.041 260.031);
+  --color-ring: oklch(0.623 0.214 259.815);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  border-color: var(--color-border);
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
