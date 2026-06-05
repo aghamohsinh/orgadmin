@@ -1,11 +1,21 @@
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Building2, Calendar, Users } from 'lucide-react'
+import { Building2, Calendar, Search, Users, X } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 import { OrgTypeBadge } from '@/components/organizations/OrgTypeBadge'
 import { CreateOrgDialog } from '@/components/organizations/CreateOrgDialog'
 import { useOrganizations } from '@/hooks/useOrganizations'
-import type { Organization } from '@/types'
+import type { OrgType, Organization } from '@/types'
+
+const TYPE_FILTERS: { label: string; value: OrgType | 'all' }[] = [
+  { label: 'All', value: 'all' },
+  { label: 'Business', value: 'business' },
+  { label: 'School', value: 'school' },
+  { label: 'Nonprofit', value: 'nonprofit' },
+]
 
 function OrgCard({ org }: { org: Organization }) {
   const navigate = useNavigate()
@@ -34,7 +44,6 @@ function OrgCard({ org }: { org: Organization }) {
             {new Date(org.created_at).toLocaleDateString()}
           </span>
         </div>
-        {/* Type-specific detail */}
         {org.type === 'school' && org.school_district && (
           <p className="mt-2 text-xs text-[--color-muted-foreground]">
             District: {org.school_district}
@@ -55,10 +64,26 @@ function OrgCard({ org }: { org: Organization }) {
 
 export function Dashboard() {
   const { data: orgs, isLoading, error } = useOrganizations()
+  const [search, setSearch] = useState('')
+  const [typeFilter, setTypeFilter] = useState<OrgType | 'all'>('all')
+
+  const filtered = useMemo(() => {
+    if (!orgs) return []
+    return orgs.filter((org) => {
+      const matchesType = typeFilter === 'all' || org.type === typeFilter
+      const matchesSearch =
+        search.trim() === '' ||
+        org.name.toLowerCase().includes(search.toLowerCase())
+      return matchesType && matchesSearch
+    })
+  }, [orgs, search, typeFilter])
+
+  const hasActiveFilter = search.trim() !== '' || typeFilter !== 'all'
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      {/* Header */}
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-[--color-foreground]">Organizations</h1>
           <p className="text-sm text-[--color-muted-foreground]">
@@ -68,6 +93,44 @@ export function Dashboard() {
         <CreateOrgDialog />
       </div>
 
+      {/* Search + filter bar */}
+      {!isLoading && !error && (orgs?.length ?? 0) > 0 && (
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative min-w-[220px] flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[--color-muted-foreground]" />
+            <Input
+              placeholder="Search organizations…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9"
+            />
+            {search && (
+              <button
+                onClick={() => setSearch('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[--color-muted-foreground] hover:text-[--color-foreground]"
+                aria-label="Clear search"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
+
+          <div className="flex gap-1">
+            {TYPE_FILTERS.map((f) => (
+              <Button
+                key={f.value}
+                variant={typeFilter === f.value ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setTypeFilter(f.value)}
+              >
+                {f.label}
+              </Button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Loading skeletons */}
       {isLoading && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 3 }).map((_, i) => (
@@ -83,12 +146,14 @@ export function Dashboard() {
         </div>
       )}
 
+      {/* Error */}
       {error && (
         <div className="rounded-md bg-[--color-destructive]/10 px-4 py-3 text-sm text-[--color-destructive]">
           Failed to load organizations: {error.message}
         </div>
       )}
 
+      {/* Empty: no orgs at all */}
       {!isLoading && !error && orgs?.length === 0 && (
         <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-20 text-center">
           <Building2 className="mb-4 h-12 w-12 text-[--color-muted-foreground]" />
@@ -99,9 +164,30 @@ export function Dashboard() {
         </div>
       )}
 
-      {!isLoading && orgs && orgs.length > 0 && (
+      {/* Empty: filtered to zero */}
+      {!isLoading && !error && orgs && orgs.length > 0 && filtered.length === 0 && (
+        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-14 text-center">
+          <Search className="mb-3 h-10 w-10 text-[--color-muted-foreground]" />
+          <p className="text-sm text-[--color-muted-foreground]">
+            No organizations match your search.
+          </p>
+          {hasActiveFilter && (
+            <Button
+              variant="link"
+              size="sm"
+              className="mt-2"
+              onClick={() => { setSearch(''); setTypeFilter('all') }}
+            >
+              Clear filters
+            </Button>
+          )}
+        </div>
+      )}
+
+      {/* Grid */}
+      {!isLoading && filtered.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {orgs.map((org) => (
+          {filtered.map((org) => (
             <OrgCard key={org.id} org={org} />
           ))}
         </div>
