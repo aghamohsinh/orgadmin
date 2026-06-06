@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import type { InviteMemberPayload, OrganizationMember } from '@/types'
 
@@ -54,6 +55,10 @@ export function useInviteMember() {
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: memberKeys.byOrg(variables.organization_id) })
+      toast.success(`Invitation sent to ${variables.email}`)
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : 'Failed to send invitation')
     },
   })
 }
